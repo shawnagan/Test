@@ -13,7 +13,7 @@ export default function Navbar({ darkMode, toggleDarkMode }) {
           </svg>
         </div>
         <div className="brand-text">
-          <span className="brand-name">AgentOS</span>
+          <span className="brand-name">ShucyOS</span>
           <span className="brand-sub">Mission Control</span>
         </div>
       </div>
