@@ -1,0 +1,71 @@
+.command-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: var(--shadow);
+}
+
+.cp-header {
+  padding: 16px 16px 12px;
+  border-bottom: 1px solid var(--border);
+}
+
+.cp-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1px;
+  background: var(--border);
+}
+
+.cp-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  padding: 14px 16px;
+  background: var(--surface);
+  border: none;
+  cursor: pointer;
+  transition: background 0.15s;
+  text-align: left;
+}
+
+.cp-btn:hover {
+  background: var(--surface-alt);
+}
+
+.cp-icon {
+  width: 28px;
+  height: 28px;
+  border-radius: 7px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+  transition: transform 0.15s;
+}
+
+.cp-btn:hover .cp-icon {
+  transform: scale(1.1);
+}
+
+.cp-btn--accent  .cp-icon { background: var(--accent-light);   color: var(--accent); }
+.cp-btn--success .cp-icon { background: var(--success-light);  color: var(--success); }
+.cp-btn--warning .cp-icon { background: var(--warning-light);  color: var(--warning); }
+.cp-btn--danger  .cp-icon { background: var(--danger-light);   color: var(--danger); }
+
+.cp-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text);
+  line-height: 1;
+}
+
+.cp-desc {
+  font-size: 0.65rem;
+  color: var(--text-muted);
+  line-height: 1.3;
+}
+
+.cp-btn--danger .cp-label { color: var(--danger); }

@@ -1,15 +1,16 @@
 import Navbar from './Navbar'
 import StatCard from './StatCard'
-import RecentActivity from './RecentActivity'
-import Chart from './Chart'
-import QuickActions from './QuickActions'
+import AgentGrid from './AgentGrid'
+import ActivityLog from './ActivityLog'
+import PlatformStatus from './PlatformStatus'
+import CommandPanel from './CommandPanel'
 import './Dashboard.css'
 
 const stats = [
-  { label: 'Total Revenue', value: '$48,295', change: '+12.5%', trend: 'up', color: 'accent' },
-  { label: 'Active Users', value: '3,842', change: '+8.1%', trend: 'up', color: 'success' },
-  { label: 'Pending Orders', value: '127', change: '-3.2%', trend: 'down', color: 'warning' },
-  { label: 'Support Tickets', value: '24', change: '+2', trend: 'up', color: 'danger' },
+  { label: 'Active Agents', value: '4 / 6', change: '+2 this hour', trend: 'up', color: 'accent' },
+  { label: 'Tasks Completed', value: '247', change: '+18.3%', trend: 'up', color: 'success' },
+  { label: 'Avg Response', value: '1.4s', change: '-0.3s', trend: 'up', color: 'warning' },
+  { label: 'Errors Today', value: '3', change: '-71.4%', trend: 'up', color: 'danger' },
 ]
 
 export default function Dashboard({ darkMode, toggleDarkMode }) {
@@ -19,12 +20,18 @@ export default function Dashboard({ darkMode, toggleDarkMode }) {
       <main className="dashboard-main">
         <div className="dashboard-header">
           <div>
-            <h1 className="dashboard-title">Overview</h1>
-            <p className="dashboard-subtitle">Welcome back! Here's what's happening today.</p>
+            <h1 className="dashboard-title">Mission Control</h1>
+            <p className="dashboard-subtitle">Real-time oversight of all deployed AI agents</p>
           </div>
-          <span className="dashboard-date">
-            {new Date().toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}
-          </span>
+          <div className="header-right">
+            <div className="live-indicator">
+              <span className="live-dot"></span>
+              LIVE
+            </div>
+            <span className="dashboard-date">
+              {new Date().toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric', year: 'numeric' })}
+            </span>
+          </div>
         </div>
 
         <div className="stats-grid">
@@ -33,12 +40,15 @@ export default function Dashboard({ darkMode, toggleDarkMode }) {
           ))}
         </div>
 
-        <div className="content-grid">
-          <Chart />
-          <QuickActions />
-        </div>
+        <AgentGrid />
 
-        <RecentActivity />
+        <div className="bottom-grid">
+          <ActivityLog />
+          <div className="side-panel">
+            <PlatformStatus />
+            <CommandPanel />
+          </div>
+        </div>
       </main>
     </div>
   )

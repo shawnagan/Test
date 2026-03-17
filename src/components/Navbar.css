@@ -17,27 +17,41 @@
   display: flex;
   align-items: center;
   gap: 10px;
-  text-decoration: none;
   flex-shrink: 0;
 }
 
 .brand-icon {
-  width: 32px;
-  height: 32px;
-  background: var(--accent);
+  width: 34px;
+  height: 34px;
+  background: linear-gradient(135deg, var(--accent), var(--purple, #a855f7));
   color: white;
   border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 700;
-  font-size: 1rem;
+}
+
+.brand-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
 }
 
 .brand-name {
-  font-size: 1.1rem;
-  font-weight: 700;
+  font-size: 1rem;
+  font-weight: 800;
   color: var(--text);
+  letter-spacing: -0.02em;
+  line-height: 1;
+}
+
+.brand-sub {
+  font-size: 0.62rem;
+  font-weight: 500;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  line-height: 1;
 }
 
 .navbar-links {
@@ -72,6 +86,35 @@
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
+}
+
+.sys-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--surface-alt);
+}
+
+.sys-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--success);
+  animation: pulse-sys 2s infinite;
+}
+
+@keyframes pulse-sys {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 var(--success); }
+  50% { opacity: 0.8; box-shadow: 0 0 0 3px rgba(0, 230, 118, 0.2); }
+}
+
+.sys-label {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--success);
 }
 
 .icon-btn {
@@ -114,7 +157,7 @@
   display: flex;
   align-items: center;
   gap: 6px;
-  padding: 6px 14px;
+  padding: 6px 12px;
   border-radius: 8px;
   border: 1px solid var(--border);
   background: var(--surface-alt);
@@ -135,25 +178,24 @@
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  background: var(--accent);
+  background: linear-gradient(135deg, var(--accent), var(--purple, #a855f7));
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 0.75rem;
-  font-weight: 600;
+  font-size: 0.7rem;
+  font-weight: 700;
   cursor: pointer;
+  border: 2px solid var(--border);
+}
+
+@media (max-width: 1100px) {
+  .sys-label { display: none; }
 }
 
 @media (max-width: 768px) {
-  .navbar {
-    padding: 0 16px;
-    gap: 16px;
-  }
-  .navbar-links {
-    display: none;
-  }
-  .theme-toggle span {
-    display: none;
-  }
+  .navbar { padding: 0 16px; gap: 16px; }
+  .navbar-links { display: none; }
+  .theme-toggle span { display: none; }
+  .sys-status { display: none; }
 }
