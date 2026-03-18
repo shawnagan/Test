@@ -18,6 +18,7 @@ const INITIAL_AGENTS = [
     avatar: 'GA',
     messageInterface: null,
     apiKey: null,
+    gatewayUrl: null,
     createdAt: new Date(),
   },
   {
@@ -35,6 +36,7 @@ const INITIAL_AGENTS = [
     avatar: 'CW',
     messageInterface: null,
     apiKey: null,
+    gatewayUrl: null,
     createdAt: new Date(),
   },
   {
@@ -52,6 +54,7 @@ const INITIAL_AGENTS = [
     avatar: 'GC',
     messageInterface: null,
     apiKey: null,
+    gatewayUrl: null,
     createdAt: new Date(),
   },
   {
@@ -69,6 +72,7 @@ const INITIAL_AGENTS = [
     avatar: 'LR',
     messageInterface: null,
     apiKey: null,
+    gatewayUrl: null,
     createdAt: new Date(),
   },
   {
@@ -86,6 +90,7 @@ const INITIAL_AGENTS = [
     avatar: 'MS',
     messageInterface: null,
     apiKey: null,
+    gatewayUrl: null,
     createdAt: new Date(),
   },
   {
@@ -103,6 +108,7 @@ const INITIAL_AGENTS = [
     avatar: 'PS',
     messageInterface: null,
     apiKey: null,
+    gatewayUrl: null,
     createdAt: new Date(),
   },
 ]
@@ -110,7 +116,7 @@ const INITIAL_AGENTS = [
 export function AgentProvider({ children }) {
   const [agents, setAgents] = useState(INITIAL_AGENTS)
 
-  function addAgent({ name, messageInterface, apiKey }) {
+  function addAgent({ name, messageInterface, apiKey, gatewayUrl }) {
     const initials = name
       .split(/\s+/)
       .map(w => w[0])
@@ -133,6 +139,7 @@ export function AgentProvider({ children }) {
       avatar: initials,
       messageInterface,
       apiKey,
+      gatewayUrl: gatewayUrl || null,
       createdAt: new Date(),
     }
 

@@ -46,8 +46,11 @@
 
 .agent-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  /* auto-fill with a fixed band keeps every card the same size regardless of
+     neighbour count; justify-content: center ensures a lone card is centred. */
+  grid-template-columns: repeat(auto-fill, minmax(300px, 380px));
   gap: 14px;
+  justify-content: center;
 }
 
 /* Card */
@@ -73,9 +76,10 @@
   height: 2px;
 }
 
-.agent-card--active::before  { background: var(--success); }
-.agent-card--idle::before    { background: var(--border); }
-.agent-card--error::before   { background: var(--danger); }
+.agent-card--active::before       { background: var(--success); }
+.agent-card--idle::before         { background: var(--warning); }
+.agent-card--error::before        { background: var(--danger); }
+.agent-card--unconfigured::before { background: var(--border); }
 
 .agent-card:hover {
   border-color: var(--accent);
@@ -330,13 +334,9 @@
   background: var(--purple-light, rgba(168,85,247,0.1));
 }
 
-@media (max-width: 1200px) {
-  .agent-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-}
-
-@media (max-width: 640px) {
+/* auto-fill handles column count; only override needed is to ensure a single
+   full-width column on very small screens where even 300 px would be cramped. */
+@media (max-width: 360px) {
   .agent-grid {
     grid-template-columns: 1fr;
   }
@@ -538,4 +538,84 @@
 .btn-primary:hover {
   opacity: 0.85;
   transform: translateY(-1px);
+}
+
+/* ── Status indicator (OpenClaw cards) ─────────── */
+
+/* Container sits as the third flex child in .agent-card-header */
+.status-indicator {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  flex-shrink: 0;
+  min-width: 60px;
+  padding-left: 8px;
+  text-align: center;
+}
+
+.status-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.status-dot--active       { background: var(--success); }
+.status-dot--idle         { background: var(--warning); }
+.status-dot--error        { background: var(--danger); }
+.status-dot--unconfigured { background: var(--border); }
+
+/* Pulsing glow — green / active only */
+.status-dot--pulse {
+  animation: status-glow 2s ease-in-out infinite;
+}
+
+@keyframes status-glow {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(0, 230, 118, 0.5); }
+  50%       { box-shadow: 0 0 0 6px rgba(0, 230, 118, 0); }
+}
+
+.status-indicator-label {
+  font-size: 0.65rem;
+  font-weight: 700;
+  line-height: 1;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.status-indicator-label--active       { color: var(--success); }
+.status-indicator-label--idle         { color: var(--warning); }
+.status-indicator-label--error        { color: var(--danger); }
+.status-indicator-label--unconfigured { color: var(--text-muted); }
+
+.status-indicator-ms {
+  font-size: 0.6rem;
+  color: var(--text-muted);
+  line-height: 1;
+}
+
+/* Inline error line shown beneath agent name when unreachable */
+.agent-inline-error {
+  display: block;
+  font-size: 0.7rem;
+  color: var(--danger);
+  margin: 2px 0 4px;
+}
+
+/* ── Form additions ─────────────────────────────── */
+
+.form-optional {
+  font-weight: 400;
+  text-transform: none;
+  letter-spacing: 0;
+  color: var(--text-muted);
+  font-size: 0.7rem;
+}
+
+.form-hint {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+  line-height: 1.4;
 }
