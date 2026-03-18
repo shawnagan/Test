@@ -1,85 +1,116 @@
+import { useState } from 'react'
+import { useAgents } from '../context/AgentContext'
 import './AgentGrid.css'
 
-const agents = [
-  {
-    id: 1,
-    name: 'GPT-Analyst',
-    model: 'GPT-4o',
-    platform: 'OpenAI',
-    platformColor: 'openai',
-    status: 'active',
-    task: 'Analyzing Q4 Financial Reports',
-    progress: 67,
-    tasksCompleted: 142,
-    uptime: '14h 32m',
-    avatar: 'GA',
-  },
-  {
-    id: 2,
-    name: 'Claude-Writer',
-    model: 'Claude 3.5 Sonnet',
-    platform: 'Anthropic',
-    platformColor: 'anthropic',
-    status: 'active',
-    task: 'Drafting Technical Blog Posts',
-    progress: 34,
-    tasksCompleted: 89,
-    uptime: '8h 17m',
-    avatar: 'CW',
-  },
-  {
-    id: 3,
-    name: 'Gemini-Coder',
-    model: 'Gemini 1.5 Pro',
-    platform: 'Google',
-    platformColor: 'google',
-    status: 'idle',
-    task: 'Awaiting Instructions',
-    progress: 0,
-    tasksCompleted: 201,
-    uptime: '22h 08m',
-    avatar: 'GC',
-  },
-  {
-    id: 4,
-    name: 'Llama-Researcher',
-    model: 'Llama 3.1 70B',
-    platform: 'Meta',
-    platformColor: 'meta',
-    status: 'active',
-    task: 'Web Research: AI Industry Trends',
-    progress: 91,
-    tasksCompleted: 56,
-    uptime: '3h 44m',
-    avatar: 'LR',
-  },
-  {
-    id: 5,
-    name: 'Mistral-Support',
-    model: 'Mistral Large',
-    platform: 'Mistral',
-    platformColor: 'mistral',
-    status: 'error',
-    task: 'Rate Limit Exceeded',
-    progress: 0,
-    tasksCompleted: 33,
-    uptime: '1h 22m',
-    avatar: 'MS',
-  },
-  {
-    id: 6,
-    name: 'Perplexity-Scout',
-    model: 'pplx-70b-online',
-    platform: 'Perplexity',
-    platformColor: 'perplexity',
-    status: 'active',
-    task: 'Market Intelligence Gathering',
-    progress: 22,
-    tasksCompleted: 78,
-    uptime: '6h 55m',
-    avatar: 'PS',
-  },
-]
+const MESSAGE_INTERFACES = ['Telegram', 'WhatsApp', 'Slack', 'Discord']
+
+function AddAgentModal({ onClose, onSubmit }) {
+  const [name, setName] = useState('')
+  const [messageInterface, setMessageInterface] = useState('')
+  const [apiKey, setApiKey] = useState('')
+  const [showKey, setShowKey] = useState(false)
+  const [errors, setErrors] = useState({})
+
+  function validate() {
+    const e = {}
+    if (!name.trim()) e.name = 'Agent name is required'
+    if (!messageInterface) e.messageInterface = 'Select a message interface'
+    if (!apiKey.trim()) e.apiKey = 'API key or webhook URL is required'
+    return e
+  }
+
+  function handleSubmit(e) {
+    e.preventDefault()
+    const e2 = validate()
+    if (Object.keys(e2).length) { setErrors(e2); return }
+    onSubmit({ name: name.trim(), messageInterface, apiKey: apiKey.trim() })
+  }
+
+  return (
+    <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
+      <div className="modal">
+        <div className="modal-header">
+          <div>
+            <h3 className="modal-title">Add OpenClaw Agent</h3>
+            <p className="modal-subtitle">Configure a new OpenClaw agent instance</p>
+          </div>
+          <button className="modal-close" onClick={onClose} aria-label="Close">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
+        </div>
+
+        <form className="modal-form" onSubmit={handleSubmit} noValidate>
+          <div className="form-field">
+            <label className="form-label">Agent Name</label>
+            <input
+              className={`form-input${errors.name ? ' form-input--error' : ''}`}
+              type="text"
+              placeholder="e.g. Support Bot"
+              value={name}
+              onChange={e => { setName(e.target.value); setErrors(p => ({ ...p, name: '' })) }}
+            />
+            {errors.name && <span className="form-error">{errors.name}</span>}
+          </div>
+
+          <div className="form-field">
+            <label className="form-label">Message Interface</label>
+            <select
+              className={`form-input form-select${errors.messageInterface ? ' form-input--error' : ''}`}
+              value={messageInterface}
+              onChange={e => { setMessageInterface(e.target.value); setErrors(p => ({ ...p, messageInterface: '' })) }}
+            >
+              <option value="">Select interface…</option>
+              {MESSAGE_INTERFACES.map(m => (
+                <option key={m} value={m}>{m}</option>
+              ))}
+            </select>
+            {errors.messageInterface && <span className="form-error">{errors.messageInterface}</span>}
+          </div>
+
+          <div className="form-field">
+            <label className="form-label">OpenClaw API Key / Webhook URL</label>
+            <div className="form-input-wrap">
+              <input
+                className={`form-input form-input-inner${errors.apiKey ? ' form-input--error' : ''}`}
+                type={showKey ? 'text' : 'password'}
+                placeholder="sk-… or https://…"
+                value={apiKey}
+                onChange={e => { setApiKey(e.target.value); setErrors(p => ({ ...p, apiKey: '' })) }}
+              />
+              <button
+                type="button"
+                className="form-eye-btn"
+                onClick={() => setShowKey(s => !s)}
+                aria-label={showKey ? 'Hide' : 'Show'}
+              >
+                {showKey ? (
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/>
+                    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/>
+                    <line x1="1" y1="1" x2="23" y2="23"/>
+                  </svg>
+                ) : (
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/>
+                    <circle cx="12" cy="12" r="3"/>
+                  </svg>
+                )}
+              </button>
+            </div>
+            {errors.apiKey && <span className="form-error">{errors.apiKey}</span>}
+          </div>
+
+          <div className="modal-footer">
+            <button type="button" className="btn-ghost" onClick={onClose}>Cancel</button>
+            <button type="submit" className="btn-primary">Add Agent</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  )
+}
 
 function AgentCard({ agent }) {
   return (
@@ -169,7 +200,16 @@ function AgentCard({ agent }) {
 }
 
 export default function AgentGrid() {
+  const { agents, addAgent } = useAgents()
+  const [modalOpen, setModalOpen] = useState(false)
+
   const activeCount = agents.filter(a => a.status === 'active').length
+
+  function handleAddAgent(data) {
+    addAgent(data)
+    setModalOpen(false)
+  }
+
   return (
     <section className="agent-grid-section">
       <div className="section-header">
@@ -177,7 +217,7 @@ export default function AgentGrid() {
           <h2 className="section-title">Deployed Agents</h2>
           <p className="section-subtitle">{activeCount} active · {agents.length - activeCount} idle or degraded · {agents.length} total</p>
         </div>
-        <button className="deploy-btn">
+        <button className="deploy-btn" onClick={() => setModalOpen(true)}>
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
             <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
           </svg>
@@ -189,6 +229,13 @@ export default function AgentGrid() {
           <AgentCard key={agent.id} agent={agent} />
         ))}
       </div>
+
+      {modalOpen && (
+        <AddAgentModal
+          onClose={() => setModalOpen(false)}
+          onSubmit={handleAddAgent}
+        />
+      )}
     </section>
   )
 }
