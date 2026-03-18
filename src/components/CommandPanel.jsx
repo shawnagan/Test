@@ -2,7 +2,7 @@ import './CommandPanel.css'
 
 const commands = [
   {
-    label: 'Deploy Agent',
+    label: 'Add Agent',
     desc: 'Launch a new agent',
     variant: 'accent',
     icon: (
