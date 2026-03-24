@@ -30,6 +30,15 @@ export default function Navbar({ darkMode, toggleDarkMode }) {
   // Bump unread count when new notifications arrive while panel is closed
   // (seenCount stays where it was so the diff grows)
 
+  const errorCount  = agents.filter(a => a.status === 'error').length
+  const activeCount2 = agents.filter(a => a.status === 'active').length
+  const sysLabel = errorCount > 0
+    ? `${errorCount} agent error${errorCount > 1 ? 's' : ''}`
+    : activeCount2 > 0
+      ? `${activeCount2} agent${activeCount2 > 1 ? 's' : ''} running`
+      : 'All Systems Nominal'
+  const sysError = errorCount > 0
+
   return (
     <nav className="navbar">
       <div className="navbar-brand">
@@ -57,8 +66,8 @@ export default function Navbar({ darkMode, toggleDarkMode }) {
 
       <div className="navbar-actions">
         <div className="sys-status">
-          <span className="sys-dot"></span>
-          <span className="sys-label">All Systems Nominal</span>
+          <span className={`sys-dot${sysError ? ' sys-dot--error' : ''}`}></span>
+          <span className={`sys-label${sysError ? ' sys-label--error' : ''}`}>{sysLabel}</span>
         </div>
 
         {/* Notification bell */}

@@ -1,8 +1,9 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useAgents } from '../context/AgentContext'
 import { useAgentStatus } from '../hooks/useAgentStatus'
 import { useToast } from './Toaster'
 import { useUptime } from '../hooks/useUptime'
+import { useConnectionTest } from '../hooks/useConnectionTest'
 import './AgentGrid.css'
 
 const MESSAGE_INTERFACES = ['Telegram', 'WhatsApp', 'Slack', 'Discord']
@@ -13,6 +14,26 @@ const STATUS_FILTER_OPTS = [
   { key: 'idle',   label: 'Idle' },
   { key: 'error',  label: 'Error' },
 ]
+
+const SORT_OPTS = [
+  { key: 'active-first', label: 'Active first' },
+  { key: 'tasks-desc',   label: 'Most tasks' },
+  { key: 'name-asc',     label: 'Name A–Z' },
+  { key: 'added-desc',   label: 'Recently added' },
+]
+
+const STATUS_ORDER = { active: 0, idle: 1, error: 2, unconfigured: 3 }
+
+function sortAgents(agents, sort) {
+  const a = [...agents]
+  switch (sort) {
+    case 'active-first': return a.sort((x, y) => (STATUS_ORDER[x.status] ?? 9) - (STATUS_ORDER[y.status] ?? 9))
+    case 'tasks-desc':   return a.sort((x, y) => y.tasksCompleted - x.tasksCompleted)
+    case 'name-asc':     return a.sort((x, y) => x.name.localeCompare(y.name))
+    case 'added-desc':   return a.sort((x, y) => new Date(y.createdAt) - new Date(x.createdAt))
+    default: return a
+  }
+}
 
 // ── Status indicator ────────────────────────────────────────────────────────
 
@@ -37,6 +58,27 @@ function StatusIndicator({ status, responseTimeMs }) {
 
 // ── Add Agent modal ─────────────────────────────────────────────────────────
 
+function ConnTestResult({ status, ms, msg }) {
+  if (status === 'idle') return null
+  if (status === 'testing') return (
+    <span className="conn-test-result conn-test-result--testing">
+      <span className="conn-spinner" />Testing…
+    </span>
+  )
+  if (status === 'ok') return (
+    <span className="conn-test-result conn-test-result--ok">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      Connected{ms != null ? ` · ${ms}ms` : ''}
+    </span>
+  )
+  return (
+    <span className="conn-test-result conn-test-result--error">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      {msg ?? 'Unreachable'}
+    </span>
+  )
+}
+
 function AddAgentModal({ onClose, onSubmit }) {
   const [name, setName] = useState('')
   const [messageInterface, setMessageInterface] = useState('')
@@ -44,6 +86,7 @@ function AddAgentModal({ onClose, onSubmit }) {
   const [gatewayUrl, setGatewayUrl] = useState('')
   const [showKey, setShowKey] = useState(false)
   const [errors, setErrors] = useState({})
+  const conn = useConnectionTest()
 
   useEffect(() => {
     function handleKey(e) { if (e.key === 'Escape') onClose() }
@@ -150,9 +193,17 @@ function AddAgentModal({ onClose, onSubmit }) {
               type="url"
               placeholder="http://localhost:3000"
               value={gatewayUrl}
-              onChange={e => setGatewayUrl(e.target.value)}
+              onChange={e => { setGatewayUrl(e.target.value); conn.reset() }}
             />
-            <span className="form-hint">Your local or hosted OpenClaw instance. Used to check live status.</span>
+            <div className="conn-test-row">
+              <button
+                type="button"
+                className="conn-test-btn"
+                disabled={!gatewayUrl.trim() || conn.status === 'testing'}
+                onClick={() => conn.test(gatewayUrl)}
+              >Test connection</button>
+              <ConnTestResult {...conn} />
+            </div>
           </div>
 
           <div className="modal-footer">
@@ -347,14 +398,18 @@ export default function AgentGrid({ addAgentOpen, onAddAgent, onCloseAddAgent, o
   const { agents, addAgent } = useAgents()
   const [search, setSearch] = useState('')
   const [statusFilter, setStatusFilter] = useState('all')
+  const [sort, setSort] = useState('active-first')
 
   const activeCount = agents.filter(a => a.status === 'active').length
 
-  const filtered = agents.filter(a => {
-    const matchStatus = statusFilter === 'all' || a.status === statusFilter
-    const matchSearch = !search || a.name.toLowerCase().includes(search.toLowerCase())
-    return matchStatus && matchSearch
-  })
+  const filtered = useMemo(() => {
+    const base = agents.filter(a => {
+      const matchStatus = statusFilter === 'all' || a.status === statusFilter
+      const matchSearch = !search || a.name.toLowerCase().includes(search.toLowerCase())
+      return matchStatus && matchSearch
+    })
+    return sortAgents(base, sort)
+  }, [agents, statusFilter, search, sort])
 
   function handleAddAgent(data) {
     addAgent(data)
@@ -397,24 +452,34 @@ export default function AgentGrid({ addAgentOpen, onAddAgent, onCloseAddAgent, o
             </button>
           ))}
         </div>
-        <div className="agent-search-wrap">
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="agent-search-icon">
-            <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
-          </svg>
-          <input
-            className="agent-search"
-            type="text"
-            placeholder="Search agents…"
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-          />
-          {search && (
-            <button className="agent-search-clear" onClick={() => setSearch('')} aria-label="Clear">
-              <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-                <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
-              </svg>
-            </button>
-          )}
+        <div className="agent-filter-right">
+          <div className="agent-search-wrap">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="agent-search-icon">
+              <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+            </svg>
+            <input
+              className="agent-search"
+              type="text"
+              placeholder="Search agents…"
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+            />
+            {search && (
+              <button className="agent-search-clear" onClick={() => setSearch('')} aria-label="Clear">
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+                </svg>
+              </button>
+            )}
+          </div>
+          <select
+            className="agent-sort-select"
+            value={sort}
+            onChange={e => setSort(e.target.value)}
+            aria-label="Sort agents"
+          >
+            {SORT_OPTS.map(o => <option key={o.key} value={o.key}>{o.label}</option>)}
+          </select>
         </div>
       </div>
 

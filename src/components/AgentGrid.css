@@ -105,6 +105,28 @@
   color: var(--accent);
 }
 
+.agent-filter-right {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.agent-sort-select {
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  cursor: pointer;
+  outline: none;
+  font-family: inherit;
+  transition: border-color 0.15s;
+}
+.agent-sort-select:hover,
+.agent-sort-select:focus { border-color: var(--accent); color: var(--text); }
+.agent-sort-select option { background: var(--surface); }
+
 .agent-search-wrap {
   position: relative;
   display: flex;
@@ -801,3 +823,48 @@
   color: var(--text-muted);
   line-height: 1.4;
 }
+
+/* ── Connection test ─────────────────────────────── */
+.conn-test-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 5px;
+}
+
+.conn-test-btn {
+  background: transparent;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 3px 10px;
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-family: inherit;
+  transition: border-color 0.15s, color 0.15s;
+}
+.conn-test-btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+.conn-test-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+.conn-test-result {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.72rem;
+  font-weight: 500;
+}
+.conn-test-result--testing { color: var(--text-muted); }
+.conn-test-result--ok      { color: var(--success); }
+.conn-test-result--error   { color: var(--danger); }
+
+.conn-spinner {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border: 1.5px solid var(--border);
+  border-top-color: var(--accent);
+  border-radius: 50%;
+  animation: conn-spin 0.7s linear infinite;
+}
+@keyframes conn-spin { to { transform: rotate(360deg); } }

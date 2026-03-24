@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useAgents } from '../context/AgentContext'
 import { useToast } from './Toaster'
 import { useUptime } from '../hooks/useUptime'
+import { useConnectionTest } from '../hooks/useConnectionTest'
 import './AgentDetailPanel.css'
 
 const MESSAGE_INTERFACES = ['Telegram', 'WhatsApp', 'Slack', 'Discord']
@@ -32,6 +33,27 @@ function Field({ label, value, mono }) {
 
 // ── Edit modal ───────────────────────────────────────────────────────────────
 
+function ConnTestResult({ status, ms, msg }) {
+  if (status === 'idle') return null
+  if (status === 'testing') return (
+    <span className="conn-test-result conn-test-result--testing">
+      <span className="conn-spinner" />Testing…
+    </span>
+  )
+  if (status === 'ok') return (
+    <span className="conn-test-result conn-test-result--ok">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      Connected{ms != null ? ` · ${ms}ms` : ''}
+    </span>
+  )
+  return (
+    <span className="conn-test-result conn-test-result--error">
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      {msg ?? 'Unreachable'}
+    </span>
+  )
+}
+
 function EditAgentModal({ agent, onClose, onSave }) {
   const isOpenClaw = agent.type === 'openclaw'
   const [name, setName] = useState(agent.name)
@@ -40,6 +62,7 @@ function EditAgentModal({ agent, onClose, onSave }) {
   const [gatewayUrl, setGatewayUrl] = useState(agent.gatewayUrl ?? '')
   const [showKey, setShowKey] = useState(false)
   const [errors, setErrors] = useState({})
+  const conn = useConnectionTest()
 
   useEffect(() => {
     function handleKey(e) { if (e.key === 'Escape') onClose() }
@@ -146,8 +169,17 @@ function EditAgentModal({ agent, onClose, onSave }) {
                   type="url"
                   placeholder="http://localhost:3000"
                   value={gatewayUrl}
-                  onChange={e => setGatewayUrl(e.target.value)}
+                  onChange={e => { setGatewayUrl(e.target.value); conn.reset() }}
                 />
+                <div className="conn-test-row">
+                  <button
+                    type="button"
+                    className="conn-test-btn"
+                    disabled={!gatewayUrl.trim() || conn.status === 'testing'}
+                    onClick={() => conn.test(gatewayUrl)}
+                  >Test connection</button>
+                  <ConnTestResult {...conn} />
+                </div>
               </div>
             </>
           )}
