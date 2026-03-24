@@ -1,6 +1,35 @@
+import { useState, useEffect, useRef } from 'react'
+import { useAgents } from '../context/AgentContext'
 import './Navbar.css'
 
 export default function Navbar({ darkMode, toggleDarkMode }) {
+  const { notifications } = useAgents()
+  const [notifOpen, setNotifOpen] = useState(false)
+  const [seenCount, setSeenCount] = useState(0)
+  const panelRef = useRef(null)
+
+  const unreadCount = Math.max(0, notifications.length - seenCount)
+
+  function openNotifications() {
+    setNotifOpen(true)
+    setSeenCount(notifications.length)
+  }
+
+  // Close panel on outside click
+  useEffect(() => {
+    if (!notifOpen) return
+    function handleClick(e) {
+      if (panelRef.current && !panelRef.current.contains(e.target)) {
+        setNotifOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClick)
+    return () => document.removeEventListener('mousedown', handleClick)
+  }, [notifOpen])
+
+  // Bump unread count when new notifications arrive while panel is closed
+  // (seenCount stays where it was so the diff grows)
+
   return (
     <nav className="navbar">
       <div className="navbar-brand">
@@ -32,13 +61,51 @@ export default function Navbar({ darkMode, toggleDarkMode }) {
           <span className="sys-label">All Systems Nominal</span>
         </div>
 
-        <button className="icon-btn" aria-label="Notifications">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
-            <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
-          </svg>
-          <span className="badge">3</span>
-        </button>
+        {/* Notification bell */}
+        <div className="notif-wrap" ref={panelRef}>
+          <button
+            className={`icon-btn${notifOpen ? ' icon-btn--active' : ''}`}
+            aria-label="Notifications"
+            onClick={notifOpen ? () => setNotifOpen(false) : openNotifications}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/>
+              <path d="M13.73 21a2 2 0 0 1-3.46 0"/>
+            </svg>
+            {unreadCount > 0 && (
+              <span className="badge">{unreadCount > 9 ? '9+' : unreadCount}</span>
+            )}
+          </button>
+
+          {notifOpen && (
+            <div className="notif-panel">
+              <div className="notif-panel-header">
+                <span className="notif-panel-title">Alerts</span>
+                <span className="notif-panel-count">{notifications.length} error{notifications.length !== 1 ? 's' : ''}</span>
+              </div>
+              {notifications.length === 0 ? (
+                <div className="notif-empty">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                    <polyline points="9 11 12 14 22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/>
+                  </svg>
+                  <p>No errors — all clear</p>
+                </div>
+              ) : (
+                <ul className="notif-list">
+                  {notifications.map(n => (
+                    <li key={n.id} className="notif-item">
+                      <div className="notif-item-top">
+                        <span className="notif-agent">{n.agent}</span>
+                        <span className="notif-ts">{n.ts}</span>
+                      </div>
+                      <p className="notif-msg">{n.msg}</p>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          )}
+        </div>
 
         <button
           className="theme-toggle"

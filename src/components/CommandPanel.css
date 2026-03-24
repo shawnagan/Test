@@ -69,3 +69,55 @@
 }
 
 .cp-btn--danger .cp-label { color: var(--danger); }
+
+.cp-btn--disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.cp-broadcast-textarea {
+  resize: vertical;
+  min-height: 90px;
+  font-family: inherit;
+}
+
+.cp-btn-broadcast {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cp-btn-broadcast:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  transform: none;
+}
+
+.cp-confirm-modal {
+  max-width: 380px;
+}
+
+.cp-confirm-title {
+  color: var(--danger) !important;
+}
+
+.btn-danger {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border: none;
+  border-radius: 8px;
+  background: var(--danger);
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: opacity 0.15s, transform 0.15s;
+  font-family: inherit;
+}
+
+.btn-danger:hover {
+  opacity: 0.85;
+  transform: translateY(-1px);
+}

@@ -1,7 +1,7 @@
 .agent-grid-section {
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 12px;
 }
 
 .section-header {
@@ -44,6 +44,188 @@
   transform: translateY(-1px);
 }
 
+/* ── Filter bar ─────────────────────────────────── */
+.agent-filter-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.agent-filter-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.agent-filter-tab {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 4px 12px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.15s;
+  font-family: inherit;
+}
+
+.agent-filter-tab:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-light);
+}
+
+.agent-filter-tab--active {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--accent-light);
+  font-weight: 700;
+}
+
+.agent-filter-count {
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  font-size: 0.6rem;
+  font-weight: 700;
+  padding: 0 5px;
+  min-width: 16px;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.agent-filter-tab--active .agent-filter-count {
+  background: var(--accent-glow);
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.agent-search-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.agent-search-icon {
+  position: absolute;
+  left: 9px;
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.agent-search {
+  background: var(--surface-alt);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 5px 30px 5px 28px;
+  font-size: 0.78rem;
+  color: var(--text);
+  outline: none;
+  width: 200px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  font-family: inherit;
+}
+
+.agent-search::placeholder {
+  color: var(--text-muted);
+}
+
+.agent-search:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-glow);
+  width: 240px;
+}
+
+.agent-search-clear {
+  position: absolute;
+  right: 8px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  padding: 2px;
+  border-radius: 3px;
+  transition: color 0.15s;
+}
+
+.agent-search-clear:hover { color: var(--text); }
+
+/* ── Empty state ────────────────────────────────── */
+.agent-grid-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  padding: 48px 24px;
+  border: 1px dashed var(--border);
+  border-radius: 12px;
+  color: var(--text-muted);
+  text-align: center;
+}
+
+.agent-grid-empty p {
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+/* ── Inline remove confirm ──────────────────────── */
+.agent-confirm {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: auto;
+}
+
+.agent-confirm-msg {
+  font-size: 0.68rem;
+  color: var(--danger);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.agent-confirm-yes,
+.agent-confirm-no {
+  padding: 3px 8px;
+  border-radius: 5px;
+  font-size: 0.65rem;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: inherit;
+  border: 1px solid;
+  transition: all 0.15s;
+}
+
+.agent-confirm-yes {
+  background: var(--danger-light);
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.agent-confirm-yes:hover {
+  background: var(--danger);
+  color: #fff;
+}
+
+.agent-confirm-no {
+  background: transparent;
+  border-color: var(--border);
+  color: var(--text-muted);
+}
+
+.agent-confirm-no:hover {
+  border-color: var(--text-muted);
+  color: var(--text);
+}
+
+/* ── Agent grid ─────────────────────────────────── */
 .agent-grid {
   display: grid;
   /* auto-fill with a fixed band keeps every card the same size regardless of

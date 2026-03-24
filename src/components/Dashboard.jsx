@@ -1,19 +1,62 @@
+import { useState } from 'react'
 import Navbar from './Navbar'
 import StatCard from './StatCard'
 import AgentGrid from './AgentGrid'
 import ActivityLog from './ActivityLog'
 import PlatformStatus from './PlatformStatus'
 import CommandPanel from './CommandPanel'
+import AgentDetailPanel from './AgentDetailPanel'
+import { useAgents } from '../context/AgentContext'
 import './Dashboard.css'
 
-const stats = [
-  { label: 'Active Agents', value: '4 / 6', change: '+2 this hour', trend: 'up', color: 'accent' },
-  { label: 'Tasks Completed', value: '247', change: '+18.3%', trend: 'up', color: 'success' },
-  { label: 'Avg Response', value: '1.4s', change: '-0.3s', trend: 'up', color: 'warning' },
-  { label: 'Errors Today', value: '3', change: '-71.4%', trend: 'up', color: 'danger' },
-]
-
 export default function Dashboard({ darkMode, toggleDarkMode }) {
+  const { agents } = useAgents()
+
+  // ── Modal / panel state ────────────────────────────────────────────────
+  const [addAgentOpen, setAddAgentOpen] = useState(false)
+  const [detailAgentId, setDetailAgentId] = useState(null)
+
+  // ── Live stats derived from context ───────────────────────────────────
+  const activeCount   = agents.filter(a => a.status === 'active').length
+  const totalAgents   = agents.length
+  const totalTasks    = agents.reduce((s, a) => s + a.tasksCompleted, 0)
+  const errorCount    = agents.filter(a => a.status === 'error').length
+  const withRt        = agents.filter(a => a.responseTimeMs != null)
+  const avgResponseMs = withRt.length
+    ? Math.round(withRt.reduce((s, a) => s + a.responseTimeMs, 0) / withRt.length)
+    : null
+
+  const stats = [
+    {
+      label: 'Active Agents',
+      value: `${activeCount} / ${totalAgents}`,
+      change: activeCount > 0 ? `${activeCount} running now` : 'None running',
+      trend: activeCount > 0 ? 'up' : 'down',
+      color: 'accent',
+    },
+    {
+      label: 'Tasks Completed',
+      value: totalTasks.toLocaleString(),
+      change: '+18.3% vs yesterday',
+      trend: 'up',
+      color: 'success',
+    },
+    {
+      label: 'Avg Response',
+      value: avgResponseMs != null ? `${avgResponseMs}ms` : '—',
+      change: avgResponseMs != null ? (avgResponseMs < 1000 ? 'Within SLA' : 'Above target') : 'No live data',
+      trend: avgResponseMs == null || avgResponseMs < 1000 ? 'up' : 'down',
+      color: 'warning',
+    },
+    {
+      label: 'Errors Today',
+      value: String(errorCount),
+      change: errorCount === 0 ? 'All clear' : `${errorCount} agent${errorCount > 1 ? 's' : ''} need attention`,
+      trend: errorCount === 0 ? 'up' : 'down',
+      color: 'danger',
+    },
+  ]
+
   return (
     <div className="dashboard">
       <Navbar darkMode={darkMode} toggleDarkMode={toggleDarkMode} />
@@ -40,16 +83,29 @@ export default function Dashboard({ darkMode, toggleDarkMode }) {
           ))}
         </div>
 
-        <AgentGrid />
+        <AgentGrid
+          addAgentOpen={addAgentOpen}
+          onAddAgent={() => setAddAgentOpen(true)}
+          onCloseAddAgent={() => setAddAgentOpen(false)}
+          onViewDetail={setDetailAgentId}
+        />
 
         <div className="bottom-grid">
           <ActivityLog />
           <div className="side-panel">
             <PlatformStatus />
-            <CommandPanel />
+            <CommandPanel onAddAgent={() => setAddAgentOpen(true)} />
           </div>
         </div>
       </main>
+
+      {/* Global slide-over panel */}
+      {detailAgentId && (
+        <AgentDetailPanel
+          agentId={detailAgentId}
+          onClose={() => setDetailAgentId(null)}
+        />
+      )}
     </div>
   )
 }

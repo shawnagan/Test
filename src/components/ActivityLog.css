@@ -141,3 +141,17 @@
   font-size: 0.8rem;
   font-family: inherit;
 }
+
+.al-err-badge,
+.al-warn-badge {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 8px;
+  padding: 1px 6px;
+  border-radius: 10px;
+  font-size: 0.65rem;
+  font-weight: 700;
+}
+
+.al-err-badge  { background: var(--danger-light);  color: var(--danger); }
+.al-warn-badge { background: var(--warning-light); color: var(--warning); }
