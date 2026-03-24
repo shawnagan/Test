@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAgents } from '../context/AgentContext'
 import './CommandPanel.css'
 
@@ -6,6 +6,12 @@ import './CommandPanel.css'
 
 function BroadcastModal({ onClose, onSend }) {
   const [msg, setMsg] = useState('')
+
+  useEffect(() => {
+    function handleKey(e) { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', handleKey)
+    return () => document.removeEventListener('keydown', handleKey)
+  }, [onClose])
 
   function handleSend() {
     if (!msg.trim()) return
@@ -62,6 +68,12 @@ function BroadcastModal({ onClose, onSend }) {
 // ── Stop-all confirm modal ──────────────────────────────────────────────────
 
 function StopAllModal({ agentCount, onClose, onConfirm }) {
+  useEffect(() => {
+    function handleKey(e) { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', handleKey)
+    return () => document.removeEventListener('keydown', handleKey)
+  }, [onClose])
+
   return (
     <div className="modal-overlay" onClick={e => e.target === e.currentTarget && onClose()}>
       <div className="modal cp-confirm-modal">

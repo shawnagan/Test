@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { useAgents } from '../context/AgentContext'
 import { useAgentStatus } from '../hooks/useAgentStatus'
 import './AgentGrid.css'
@@ -42,6 +42,12 @@ function AddAgentModal({ onClose, onSubmit }) {
   const [gatewayUrl, setGatewayUrl] = useState('')
   const [showKey, setShowKey] = useState(false)
   const [errors, setErrors] = useState({})
+
+  useEffect(() => {
+    function handleKey(e) { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', handleKey)
+    return () => document.removeEventListener('keydown', handleKey)
+  }, [onClose])
 
   function validate() {
     const e = {}
@@ -172,7 +178,10 @@ function AgentCard({ agent, onViewDetail }) {
     updateAgentStatus(agent.id, polled.status, polled.responseTimeMs)
   }, [polled.status, polled.responseTimeMs, agent.id, isOpenClaw, updateAgentStatus])
 
-  const borderStatus = isOpenClaw ? polled.status : agent.status
+  // openclaw "idle" means "responding slowly" → use idle-slow accent colour
+  const borderStatus = isOpenClaw
+    ? (polled.status === 'idle' ? 'idle-slow' : polled.status)
+    : agent.status
 
   function handlePauseResume() {
     if (agent.status === 'active') {

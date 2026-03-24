@@ -138,7 +138,6 @@
 .agent-search:focus {
   border-color: var(--accent);
   box-shadow: 0 0 0 2px var(--accent-glow);
-  width: 240px;
 }
 
 .agent-search-clear {
@@ -259,7 +258,8 @@
 }
 
 .agent-card--active::before       { background: var(--success); }
-.agent-card--idle::before         { background: var(--warning); }
+.agent-card--idle::before         { background: var(--border); }
+.agent-card--idle-slow::before    { background: var(--warning); }
 .agent-card--error::before        { background: var(--danger); }
 .agent-card--unconfigured::before { background: var(--border); }
 

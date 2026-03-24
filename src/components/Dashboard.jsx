@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import Navbar from './Navbar'
 import StatCard from './StatCard'
 import AgentGrid from './AgentGrid'
@@ -15,6 +15,8 @@ export default function Dashboard({ darkMode, toggleDarkMode }) {
   // ── Modal / panel state ────────────────────────────────────────────────
   const [addAgentOpen, setAddAgentOpen] = useState(false)
   const [detailAgentId, setDetailAgentId] = useState(null)
+
+  const handleCloseDetail = useCallback(() => setDetailAgentId(null), [])
 
   // ── Live stats derived from context ───────────────────────────────────
   const activeCount   = agents.filter(a => a.status === 'active').length
@@ -103,7 +105,7 @@ export default function Dashboard({ darkMode, toggleDarkMode }) {
       {detailAgentId && (
         <AgentDetailPanel
           agentId={detailAgentId}
-          onClose={() => setDetailAgentId(null)}
+          onClose={handleCloseDetail}
         />
       )}
     </div>

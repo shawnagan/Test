@@ -21,6 +21,7 @@ const INITIAL_AGENTS = [
     platformColor: 'openai',
     model: 'GPT-4o',
     status: 'active',
+    userPaused: false,
     task: 'Analyzing Q4 Financial Reports',
     progress: 67,
     tasksCompleted: 142,
@@ -40,6 +41,7 @@ const INITIAL_AGENTS = [
     platformColor: 'anthropic',
     model: 'Claude 3.5 Sonnet',
     status: 'active',
+    userPaused: false,
     task: 'Drafting Technical Blog Posts',
     progress: 34,
     tasksCompleted: 89,
@@ -59,6 +61,7 @@ const INITIAL_AGENTS = [
     platformColor: 'google',
     model: 'Gemini 1.5 Pro',
     status: 'idle',
+    userPaused: false,
     task: 'Awaiting Instructions',
     progress: 0,
     tasksCompleted: 201,
@@ -78,6 +81,7 @@ const INITIAL_AGENTS = [
     platformColor: 'meta',
     model: 'Llama 3.1 70B',
     status: 'active',
+    userPaused: false,
     task: 'Web Research: AI Industry Trends',
     progress: 91,
     tasksCompleted: 56,
@@ -97,6 +101,7 @@ const INITIAL_AGENTS = [
     platformColor: 'mistral',
     model: 'Mistral Large',
     status: 'error',
+    userPaused: false,
     task: 'Rate Limit Exceeded',
     progress: 0,
     tasksCompleted: 33,
@@ -116,6 +121,7 @@ const INITIAL_AGENTS = [
     platformColor: 'perplexity',
     model: 'pplx-70b-online',
     status: 'active',
+    userPaused: false,
     task: 'Market Intelligence Gathering',
     progress: 22,
     tasksCompleted: 78,
@@ -155,10 +161,13 @@ export function AgentProvider({ children }) {
   }
 
   // Stable reference — used inside a useEffect dep array in AgentCard
+  // Respects userPaused: polling cannot overwrite a manually-paused agent's status
   const updateAgentStatus = useCallback((id, status, responseTimeMs) => {
-    setAgents(prev =>
-      prev.map(a => a.id === id ? { ...a, status, responseTimeMs } : a)
-    )
+    setAgents(prev => prev.map(a => {
+      if (a.id !== id) return a
+      if (a.userPaused) return { ...a, responseTimeMs } // keep paused status, update RT only
+      return { ...a, status, responseTimeMs }
+    }))
   }, [])
 
   function addAgent({ name, messageInterface, apiKey, gatewayUrl }) {
@@ -177,6 +186,7 @@ export function AgentProvider({ children }) {
       platformColor: 'openclaw',
       model: messageInterface,
       status: 'idle',
+      userPaused: false,
       task: 'Awaiting Instructions',
       progress: 0,
       tasksCompleted: 0,
@@ -196,14 +206,14 @@ export function AgentProvider({ children }) {
   function pauseAgent(id) {
     const agent = agents.find(a => a.id === id)
     if (!agent) return
-    setAgents(prev => prev.map(a => a.id === id ? { ...a, status: 'idle' } : a))
+    setAgents(prev => prev.map(a => a.id === id ? { ...a, status: 'idle', userPaused: true } : a))
     pushEvent(agent.name, 'warning', 'Agent paused by operator')
   }
 
   function resumeAgent(id) {
     const agent = agents.find(a => a.id === id)
     if (!agent) return
-    setAgents(prev => prev.map(a => a.id === id ? { ...a, status: 'active' } : a))
+    setAgents(prev => prev.map(a => a.id === id ? { ...a, status: 'active', userPaused: false } : a))
     pushEvent(agent.name, 'info', 'Agent resumed by operator')
   }
 

@@ -37,7 +37,7 @@ export default function ActivityLog() {
           <p className="section-subtitle">
             Live event stream · {events.length} events
             {errorCount > 0 && <span className="al-err-badge">{errorCount} error{errorCount > 1 ? 's' : ''}</span>}
-            {warningCount > 0 && !errorCount && <span className="al-warn-badge">{warningCount} warning{warningCount > 1 ? 's' : ''}</span>}
+            {warningCount > 0 && <span className="al-warn-badge">{warningCount} warning{warningCount > 1 ? 's' : ''}</span>}
           </p>
         </div>
         <div className="al-filters">
