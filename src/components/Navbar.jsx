@@ -3,7 +3,7 @@ import { useAgents } from '../context/AgentContext'
 import './Navbar.css'
 
 export default function Navbar({ darkMode, toggleDarkMode }) {
-  const { notifications } = useAgents()
+  const { agents, notifications } = useAgents()
   const [notifOpen, setNotifOpen] = useState(false)
   const [seenCount, setSeenCount] = useState(0)
   const panelRef = useRef(null)
