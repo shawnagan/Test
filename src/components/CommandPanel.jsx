@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useAgents } from '../context/AgentContext'
+import { useToast } from './Toaster'
 import './CommandPanel.css'
 
 // ── Broadcast modal ─────────────────────────────────────────────────────────
@@ -106,6 +107,7 @@ function StopAllModal({ agentCount, onClose, onConfirm }) {
 
 export default function CommandPanel({ onAddAgent }) {
   const { agents, events, stopAllAgents, broadcastMessage } = useAgents()
+  const { addToast } = useToast()
   const [broadcastOpen, setBroadcastOpen] = useState(false)
   const [stopAllOpen, setStopAllOpen] = useState(false)
 
@@ -125,6 +127,18 @@ export default function CommandPanel({ onAddAgent }) {
     a.click()
     document.body.removeChild(a)
     URL.revokeObjectURL(url)
+    addToast(`${events.length} events exported`, 'success')
+  }
+
+  function handleBroadcast(msg) {
+    broadcastMessage(msg)
+    addToast(`Broadcast sent to ${agents.length} agents`, 'info')
+  }
+
+  function handleStopAll() {
+    const n = agents.filter(a => a.status === 'active').length
+    stopAllAgents()
+    addToast(`${n} agent${n !== 1 ? 's' : ''} halted`, 'warning')
   }
 
   const commands = [
@@ -201,7 +215,7 @@ export default function CommandPanel({ onAddAgent }) {
       {broadcastOpen && (
         <BroadcastModal
           onClose={() => setBroadcastOpen(false)}
-          onSend={broadcastMessage}
+          onSend={handleBroadcast}
         />
       )}
 
@@ -209,7 +223,7 @@ export default function CommandPanel({ onAddAgent }) {
         <StopAllModal
           agentCount={activeCount}
           onClose={() => setStopAllOpen(false)}
-          onConfirm={stopAllAgents}
+          onConfirm={handleStopAll}
         />
       )}
     </>

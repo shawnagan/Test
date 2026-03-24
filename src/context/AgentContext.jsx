@@ -1,4 +1,4 @@
-import { createContext, useContext, useState, useCallback } from 'react'
+import { createContext, useContext, useState, useCallback, useEffect } from 'react'
 
 const AgentContext = createContext(null)
 
@@ -8,6 +8,10 @@ function nowTs() {
 
 function makeEvent(agent, level, msg) {
   return { id: crypto.randomUUID(), ts: nowTs(), agent, level, msg }
+}
+
+function hoursAgo(h) {
+  return new Date(Date.now() - h * 3_600_000)
 }
 
 // ── Initial data ────────────────────────────────────────────────────────────
@@ -25,13 +29,12 @@ const INITIAL_AGENTS = [
     task: 'Analyzing Q4 Financial Reports',
     progress: 67,
     tasksCompleted: 142,
-    uptime: '14h 32m',
+    createdAt: hoursAgo(14.5),
     avatar: 'GA',
     messageInterface: null,
     apiKey: null,
     gatewayUrl: null,
     responseTimeMs: null,
-    createdAt: new Date(),
   },
   {
     id: '2',
@@ -45,13 +48,12 @@ const INITIAL_AGENTS = [
     task: 'Drafting Technical Blog Posts',
     progress: 34,
     tasksCompleted: 89,
-    uptime: '8h 17m',
+    createdAt: hoursAgo(8.3),
     avatar: 'CW',
     messageInterface: null,
     apiKey: null,
     gatewayUrl: null,
     responseTimeMs: null,
-    createdAt: new Date(),
   },
   {
     id: '3',
@@ -65,13 +67,12 @@ const INITIAL_AGENTS = [
     task: 'Awaiting Instructions',
     progress: 0,
     tasksCompleted: 201,
-    uptime: '22h 08m',
+    createdAt: hoursAgo(22.1),
     avatar: 'GC',
     messageInterface: null,
     apiKey: null,
     gatewayUrl: null,
     responseTimeMs: null,
-    createdAt: new Date(),
   },
   {
     id: '4',
@@ -85,13 +86,12 @@ const INITIAL_AGENTS = [
     task: 'Web Research: AI Industry Trends',
     progress: 91,
     tasksCompleted: 56,
-    uptime: '3h 44m',
+    createdAt: hoursAgo(3.7),
     avatar: 'LR',
     messageInterface: null,
     apiKey: null,
     gatewayUrl: null,
     responseTimeMs: null,
-    createdAt: new Date(),
   },
   {
     id: '5',
@@ -105,13 +105,12 @@ const INITIAL_AGENTS = [
     task: 'Rate Limit Exceeded',
     progress: 0,
     tasksCompleted: 33,
-    uptime: '1h 22m',
+    createdAt: hoursAgo(1.4),
     avatar: 'MS',
     messageInterface: null,
     apiKey: null,
     gatewayUrl: null,
     responseTimeMs: null,
-    createdAt: new Date(),
   },
   {
     id: '6',
@@ -125,13 +124,12 @@ const INITIAL_AGENTS = [
     task: 'Market Intelligence Gathering',
     progress: 22,
     tasksCompleted: 78,
-    uptime: '6h 55m',
+    createdAt: hoursAgo(6.9),
     avatar: 'PS',
     messageInterface: null,
     apiKey: null,
     gatewayUrl: null,
     responseTimeMs: null,
-    createdAt: new Date(),
   },
 ]
 
@@ -150,11 +148,80 @@ const INITIAL_EVENTS = [
   { id: 'e12', ts: '14:27:59', agent: 'Mistral-Support',   level: 'error',   msg: 'Auth token expired — attempting silent refresh' },
 ]
 
+const MOCK_TASKS = [
+  'Analyzing customer sentiment across 1,200 reviews',
+  'Generating weekly performance summary report',
+  'Processing and classifying incoming data batch',
+  'Running validation suite on model outputs',
+  'Synthesizing research from 18 academic sources',
+  'Cross-referencing knowledge base for inconsistencies',
+  'Drafting structured briefing document',
+  'Scanning market data for anomalies',
+  'Updating internal knowledge graph',
+  'Evaluating response quality on test set',
+]
+
+// ── Persistence helpers ──────────────────────────────────────────────────────
+
+const STORAGE_KEY = 'mc-agents'
+
+function saveAgents(agents) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(agents))
+  } catch {}
+}
+
+function loadAgents() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY)
+    if (!raw) return INITIAL_AGENTS
+    const parsed = JSON.parse(raw)
+    return parsed.map(a => ({ ...a, createdAt: new Date(a.createdAt) }))
+  } catch {
+    return INITIAL_AGENTS
+  }
+}
+
 // ── Provider ────────────────────────────────────────────────────────────────
 
 export function AgentProvider({ children }) {
-  const [agents, setAgents] = useState(INITIAL_AGENTS)
+  const [agents, setAgents] = useState(loadAgents)
   const [events, setEvents] = useState(INITIAL_EVENTS)
+
+  // Persist agents to localStorage on every change
+  useEffect(() => {
+    saveAgents(agents)
+  }, [agents])
+
+  // ── Mock agent simulation ──────────────────────────────────────────────────
+  useEffect(() => {
+    const timer = setInterval(() => {
+      const completions = []
+
+      setAgents(prev => prev.map(a => {
+        if (a.type !== 'mock' || a.status !== 'active' || a.userPaused) return a
+        const inc = Math.floor(Math.random() * 4) + 1
+        const newProgress = a.progress + inc
+        if (newProgress >= 100) {
+          const newTask = MOCK_TASKS[Math.floor(Math.random() * MOCK_TASKS.length)]
+          completions.push({ name: a.name, task: newTask })
+          return { ...a, progress: 0, tasksCompleted: a.tasksCompleted + 1, task: newTask }
+        }
+        return { ...a, progress: newProgress }
+      }))
+
+      if (completions.length > 0) {
+        setEvents(prev => {
+          const newEvents = completions.map(c =>
+            makeEvent(c.name, 'success', `Task complete — starting: ${c.task}`)
+          )
+          return [...newEvents, ...prev].slice(0, 500)
+        })
+      }
+    }, 6_000)
+
+    return () => clearInterval(timer)
+  }, [])
 
   function pushEvent(agent, level, msg) {
     setEvents(prev => [makeEvent(agent, level, msg), ...prev].slice(0, 500))
@@ -165,7 +232,7 @@ export function AgentProvider({ children }) {
   const updateAgentStatus = useCallback((id, status, responseTimeMs) => {
     setAgents(prev => prev.map(a => {
       if (a.id !== id) return a
-      if (a.userPaused) return { ...a, responseTimeMs } // keep paused status, update RT only
+      if (a.userPaused) return { ...a, responseTimeMs }
       return { ...a, status, responseTimeMs }
     }))
   }, [])
@@ -190,17 +257,51 @@ export function AgentProvider({ children }) {
       task: 'Awaiting Instructions',
       progress: 0,
       tasksCompleted: 0,
-      uptime: '0m',
+      createdAt: new Date(),
       avatar: initials,
       messageInterface,
       apiKey,
       gatewayUrl: gatewayUrl || null,
       responseTimeMs: null,
-      createdAt: new Date(),
     }
 
     setAgents(prev => [...prev, newAgent])
     pushEvent(name, 'info', `Agent "${name}" added to Mission Control via ${messageInterface}`)
+  }
+
+  function editAgent(id, { name, messageInterface, apiKey, gatewayUrl }) {
+    setAgents(prev => prev.map(a => {
+      if (a.id !== id) return a
+      const initials = name
+        .split(/\s+/)
+        .map(w => w[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
+      return {
+        ...a,
+        name,
+        avatar: initials,
+        ...(a.type === 'openclaw' && {
+          messageInterface,
+          model: messageInterface,
+          apiKey,
+          gatewayUrl: gatewayUrl || null,
+        }),
+      }
+    }))
+    const agent = agents.find(a => a.id === id)
+    pushEvent(name, 'info', `Agent "${agent?.name ?? name}" configuration updated`)
+  }
+
+  function assignTask(id, instruction) {
+    setAgents(prev => prev.map(a =>
+      a.id === id
+        ? { ...a, task: instruction, status: 'active', userPaused: false, progress: 0 }
+        : a
+    ))
+    const agent = agents.find(a => a.id === id)
+    pushEvent(agent?.name ?? 'Unknown', 'info', `Task assigned: ${instruction}`)
   }
 
   function pauseAgent(id) {
@@ -226,7 +327,9 @@ export function AgentProvider({ children }) {
   function stopAllAgents() {
     const activeAgents = agents.filter(a => a.status === 'active')
     if (activeAgents.length === 0) return
-    setAgents(prev => prev.map(a => a.status === 'active' ? { ...a, status: 'idle' } : a))
+    setAgents(prev => prev.map(a =>
+      a.status === 'active' ? { ...a, status: 'idle', userPaused: true } : a
+    ))
     pushEvent('System', 'warning', `All agents halted by operator — ${activeAgents.length} agent${activeAgents.length > 1 ? 's' : ''} stopped`)
   }
 
@@ -252,6 +355,8 @@ export function AgentProvider({ children }) {
       events,
       notifications,
       addAgent,
+      editAgent,
+      assignTask,
       updateAgentStatus,
       pauseAgent,
       resumeAgent,

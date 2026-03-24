@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Dashboard from './components/Dashboard'
 import { AgentProvider } from './context/AgentContext'
+import { ToastProvider } from './components/Toaster'
 import './App.css'
 
 function App() {
@@ -8,9 +9,11 @@ function App() {
 
   return (
     <AgentProvider>
-      <div className={`app ${darkMode ? 'dark' : 'light'}`}>
-        <Dashboard darkMode={darkMode} toggleDarkMode={() => setDarkMode(d => !d)} />
-      </div>
+      <ToastProvider>
+        <div className={`app ${darkMode ? 'dark' : 'light'}`}>
+          <Dashboard darkMode={darkMode} toggleDarkMode={() => setDarkMode(d => !d)} />
+        </div>
+      </ToastProvider>
     </AgentProvider>
   )
 }

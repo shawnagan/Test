@@ -1,6 +1,8 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect } from 'react'
 import { useAgents } from '../context/AgentContext'
 import { useAgentStatus } from '../hooks/useAgentStatus'
+import { useToast } from './Toaster'
+import { useUptime } from '../hooks/useUptime'
 import './AgentGrid.css'
 
 const MESSAGE_INTERFACES = ['Telegram', 'WhatsApp', 'Slack', 'Discord']
@@ -167,10 +169,12 @@ function AddAgentModal({ onClose, onSubmit }) {
 
 function AgentCard({ agent, onViewDetail }) {
   const { pauseAgent, resumeAgent, removeAgent, updateAgentStatus } = useAgents()
+  const { addToast } = useToast()
   const [confirmRemove, setConfirmRemove] = useState(false)
 
   const isOpenClaw = agent.type === 'openclaw'
   const polled = useAgentStatus(isOpenClaw ? agent.gatewayUrl : null)
+  const uptime = useUptime(agent.createdAt)
 
   // Sync polled status back to context so the grid filter works correctly
   useEffect(() => {
@@ -186,9 +190,16 @@ function AgentCard({ agent, onViewDetail }) {
   function handlePauseResume() {
     if (agent.status === 'active') {
       pauseAgent(agent.id)
+      addToast(`${agent.name} paused`, 'warning')
     } else {
       resumeAgent(agent.id)
+      addToast(`${agent.name} resumed`, 'success')
     }
+  }
+
+  function handleRemove() {
+    removeAgent(agent.id)
+    addToast(`${agent.name} removed`, 'warning')
   }
 
   return (
@@ -273,7 +284,7 @@ function AgentCard({ agent, onViewDetail }) {
           <span className="af-label">Tasks Done</span>
         </div>
         <div className="agent-stat">
-          <span className="af-value">{agent.uptime}</span>
+          <span className="af-value">{uptime}</span>
           <span className="af-label">Uptime</span>
         </div>
 
@@ -283,7 +294,7 @@ function AgentCard({ agent, onViewDetail }) {
               <span className="agent-confirm-msg">Remove?</span>
               <button
                 className="agent-confirm-yes"
-                onClick={() => removeAgent(agent.id)}
+                onClick={handleRemove}
                 title="Confirm remove"
               >Yes</button>
               <button
@@ -309,6 +320,7 @@ function AgentCard({ agent, onViewDetail }) {
                 className="agent-btn agent-btn--stop"
                 title="Remove agent"
                 onClick={() => setConfirmRemove(true)}
+                aria-label="Remove agent"
               >
                 <svg width="11" height="11" viewBox="0 0 24 24" fill="currentColor"><rect x="4" y="4" width="16" height="16" rx="2"/></svg>
               </button>
