@@ -26,11 +26,24 @@ const icons = {
   ),
 }
 
-export default function StatCard({ label, value, change, trend, color }) {
+const expandIcon = (
+  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+    <polyline points="15 3 21 3 21 9"/><polyline points="9 21 3 21 3 15"/>
+    <line x1="21" y1="3" x2="14" y2="10"/><line x1="3" y1="21" x2="10" y2="14"/>
+  </svg>
+)
+
+export default function StatCard({ label, value, change, trend, color, onClick }) {
   const isPositive = trend === 'up'
 
   return (
-    <div className="stat-card">
+    <div
+      className={`stat-card stat-card--${color}${onClick ? ' stat-card--clickable' : ''}`}
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') onClick() } : undefined}
+    >
       <div className="stat-top">
         <span className="stat-label">{label}</span>
         <div className={`stat-icon stat-icon--${color}`}>
@@ -38,14 +51,22 @@ export default function StatCard({ label, value, change, trend, color }) {
         </div>
       </div>
       <div className="stat-value">{value}</div>
-      <div className={`stat-change ${isPositive ? 'stat-change--up' : 'stat-change--down'}`}>
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
-          {isPositive
-            ? <><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></>
-            : <><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></>
-          }
-        </svg>
-        <span>{change}</span>
+      <div className="stat-bottom">
+        <div className={`stat-change ${isPositive ? 'stat-change--up' : 'stat-change--down'}`}>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            {isPositive
+              ? <><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></>
+              : <><polyline points="23 18 13.5 8.5 8.5 13.5 1 6"/><polyline points="17 18 23 18 23 12"/></>
+            }
+          </svg>
+          <span>{change}</span>
+        </div>
+        {onClick && (
+          <span className="stat-drill-hint">
+            {expandIcon}
+            Details
+          </span>
+        )}
       </div>
     </div>
   )

@@ -6,6 +6,7 @@ import ActivityLog from './ActivityLog'
 import PlatformStatus from './PlatformStatus'
 import CommandPanel from './CommandPanel'
 import AgentDetailPanel from './AgentDetailPanel'
+import StatDrillModal from './StatDrillModal'
 import { useAgents } from '../context/AgentContext'
 import './Dashboard.css'
 
@@ -13,48 +14,58 @@ export default function Dashboard({ darkMode, toggleDarkMode }) {
   const { agents } = useAgents()
 
   // ── Modal / panel state ────────────────────────────────────────────────
-  const [addAgentOpen, setAddAgentOpen] = useState(false)
+  const [addAgentOpen,  setAddAgentOpen]  = useState(false)
   const [detailAgentId, setDetailAgentId] = useState(null)
+  const [drillStat,     setDrillStat]     = useState(null) // 'active' | 'in-progress' | 'idle' | 'attention'
 
   const handleCloseDetail = useCallback(() => setDetailAgentId(null), [])
+  const handleCloseDrill  = useCallback(() => setDrillStat(null), [])
 
   // ── Live stats derived from context ───────────────────────────────────
-  const activeCount   = agents.filter(a => a.status === 'active').length
-  const totalAgents   = agents.length
-  const totalTasks    = agents.reduce((s, a) => s + a.tasksCompleted, 0)
-  const errorCount    = agents.filter(a => a.status === 'error').length
-  const withRt        = agents.filter(a => a.responseTimeMs != null)
-  const avgResponseMs = withRt.length
-    ? Math.round(withRt.reduce((s, a) => s + a.responseTimeMs, 0) / withRt.length)
-    : null
+  const activeAgents    = agents.filter(a => a.status === 'active')
+  const idleAgents      = agents.filter(a => a.status === 'idle')
+  const attentionAgents = agents.filter(a => a.status === 'error')
+  const inProgressAgents = activeAgents.filter(a => a.progress > 0)
 
   const stats = [
     {
+      id: 'active',
       label: 'Active Agents',
-      value: `${activeCount} / ${totalAgents}`,
-      change: activeCount > 0 ? `${activeCount} running now` : 'None running',
-      trend: activeCount > 0 ? 'up' : 'down',
+      value: `${activeAgents.length} / ${agents.length}`,
+      change: activeAgents.length > 0
+        ? `${activeAgents.length} running now`
+        : 'None running',
+      trend: activeAgents.length > 0 ? 'up' : 'down',
       color: 'accent',
     },
     {
-      label: 'Tasks Completed',
-      value: totalTasks.toLocaleString(),
-      change: '+18.3% vs yesterday',
-      trend: 'up',
+      id: 'in-progress',
+      label: 'Tasks in Progress',
+      value: String(inProgressAgents.length),
+      change: inProgressAgents.length > 0
+        ? `${inProgressAgents.length} agent${inProgressAgents.length > 1 ? 's' : ''} working`
+        : 'No active work',
+      trend: inProgressAgents.length > 0 ? 'up' : 'down',
       color: 'success',
     },
     {
-      label: 'Avg Response',
-      value: avgResponseMs != null ? `${avgResponseMs}ms` : '—',
-      change: avgResponseMs != null ? (avgResponseMs < 1000 ? 'Within SLA' : 'Above target') : 'No live data',
-      trend: avgResponseMs == null || avgResponseMs < 1000 ? 'up' : 'down',
+      id: 'idle',
+      label: 'Idle Agents',
+      value: String(idleAgents.length),
+      change: idleAgents.length === 0
+        ? 'Full fleet utilization'
+        : `${idleAgents.length} awaiting tasks`,
+      trend: idleAgents.length === 0 ? 'up' : 'down',
       color: 'warning',
     },
     {
-      label: 'Errors Today',
-      value: String(errorCount),
-      change: errorCount === 0 ? 'All clear' : `${errorCount} agent${errorCount > 1 ? 's' : ''} need attention`,
-      trend: errorCount === 0 ? 'up' : 'down',
+      id: 'attention',
+      label: 'Needs Attention',
+      value: String(attentionAgents.length),
+      change: attentionAgents.length === 0
+        ? 'All clear'
+        : `${attentionAgents.length} agent${attentionAgents.length > 1 ? 's' : ''} need${attentionAgents.length === 1 ? 's' : ''} attention`,
+      trend: attentionAgents.length === 0 ? 'up' : 'down',
       color: 'danger',
     },
   ]
@@ -81,7 +92,11 @@ export default function Dashboard({ darkMode, toggleDarkMode }) {
 
         <div className="stats-grid">
           {stats.map(stat => (
-            <StatCard key={stat.label} {...stat} />
+            <StatCard
+              key={stat.id}
+              {...stat}
+              onClick={() => setDrillStat(stat.id)}
+            />
           ))}
         </div>
 
@@ -101,11 +116,17 @@ export default function Dashboard({ darkMode, toggleDarkMode }) {
         </div>
       </main>
 
-      {/* Global slide-over panel */}
       {detailAgentId && (
         <AgentDetailPanel
           agentId={detailAgentId}
           onClose={handleCloseDetail}
+        />
+      )}
+
+      {drillStat && (
+        <StatDrillModal
+          stat={drillStat}
+          onClose={handleCloseDrill}
         />
       )}
     </div>

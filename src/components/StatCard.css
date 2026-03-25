@@ -4,13 +4,32 @@
   border-radius: 12px;
   padding: 20px;
   box-shadow: var(--shadow);
-  transition: box-shadow 0.2s, background 0.3s ease, border-color 0.3s ease;
+  transition: box-shadow 0.2s, border-color 0.2s, transform 0.15s, background 0.3s ease;
+  outline: none;
+  user-select: none;
 }
 
-.stat-card:hover {
+/* Clickable variant */
+.stat-card--clickable { cursor: pointer; }
+
+.stat-card--clickable:hover,
+.stat-card--clickable:focus-visible {
+  transform: translateY(-2px);
   box-shadow: var(--shadow-md);
 }
 
+.stat-card--accent.stat-card--clickable:hover,
+.stat-card--accent.stat-card--clickable:focus-visible   { border-color: var(--accent); }
+.stat-card--success.stat-card--clickable:hover,
+.stat-card--success.stat-card--clickable:focus-visible  { border-color: var(--success); }
+.stat-card--warning.stat-card--clickable:hover,
+.stat-card--warning.stat-card--clickable:focus-visible  { border-color: var(--warning); }
+.stat-card--danger.stat-card--clickable:hover,
+.stat-card--danger.stat-card--clickable:focus-visible   { border-color: var(--danger); }
+
+.stat-card--clickable:active { transform: translateY(0); }
+
+/* Header row */
 .stat-top {
   display: flex;
   justify-content: space-between;
@@ -40,13 +59,22 @@
 .stat-icon--warning { background: var(--warning-light); color: var(--warning); }
 .stat-icon--danger  { background: var(--danger-light);  color: var(--danger); }
 
+/* Value */
 .stat-value {
   font-size: 1.8rem;
   font-weight: 700;
   color: var(--text);
   line-height: 1;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
   letter-spacing: -0.02em;
+}
+
+/* Bottom row: change + drill hint */
+.stat-bottom {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .stat-change {
@@ -59,3 +87,22 @@
 
 .stat-change--up   { color: var(--success); }
 .stat-change--down { color: var(--danger); }
+
+.stat-drill-hint {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.68rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  opacity: 0;
+  transition: opacity 0.15s;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.stat-card--clickable:hover .stat-drill-hint,
+.stat-card--clickable:focus-visible .stat-drill-hint {
+  opacity: 1;
+}

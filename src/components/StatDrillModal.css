@@ -1,0 +1,267 @@
+/* Override: drill modal is wider than the standard form modal */
+.drill-overlay {
+  align-items: center;
+}
+
+.drill-modal {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  width: min(720px, 95vw);
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
+  animation: drill-in 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes drill-in {
+  from { opacity: 0; transform: scale(0.95) translateY(8px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+/* Header */
+.drill-modal-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 22px 24px 18px;
+  border-bottom: 1px solid var(--border);
+  gap: 16px;
+  flex-shrink: 0;
+}
+
+.drill-modal-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text);
+  margin: 0 0 4px;
+  letter-spacing: -0.01em;
+}
+
+.drill-modal-sub {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+/* Scrollable body */
+.drill-modal-body {
+  overflow-y: auto;
+  padding: 16px 24px 24px;
+  flex: 1;
+}
+
+.drill-modal-body::-webkit-scrollbar { width: 4px; }
+.drill-modal-body::-webkit-scrollbar-track { background: transparent; }
+.drill-modal-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+/* Table */
+.drill-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+
+.drill-table thead th {
+  text-align: left;
+  font-size: 0.65rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+  padding: 0 12px 10px 0;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+
+.drill-table thead th:last-child { padding-right: 0; }
+
+.drill-table tbody td {
+  padding: 12px 12px 12px 0;
+  border-bottom: 1px solid var(--border);
+  vertical-align: middle;
+  color: var(--text);
+}
+
+.drill-table tbody td:last-child { padding-right: 0; }
+
+.drill-table tbody tr:last-child td { border-bottom: none; }
+
+.drill-table tbody tr:hover td { background: var(--surface-alt); }
+
+/* Agent cell */
+.drill-agent-cell {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 140px;
+}
+
+.drill-avatar {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.62rem;
+  font-weight: 800;
+  color: #fff;
+  flex-shrink: 0;
+  letter-spacing: 0.02em;
+}
+
+.drill-avatar--openai     { background: linear-gradient(135deg, #10a37f, #0d8a6b); }
+.drill-avatar--anthropic  { background: linear-gradient(135deg, #d97706, #b45309); }
+.drill-avatar--google     { background: linear-gradient(135deg, #4285f4, #2563eb); }
+.drill-avatar--meta       { background: linear-gradient(135deg, #0866ff, #0552cc); }
+.drill-avatar--mistral    { background: linear-gradient(135deg, #7c3aed, #6026c7); }
+.drill-avatar--perplexity { background: linear-gradient(135deg, #20b2aa, #178a83); }
+.drill-avatar--openclaw   { background: linear-gradient(135deg, #f97316, #ea580c); }
+
+.drill-agent-name {
+  font-weight: 600;
+  color: var(--text);
+  font-size: 0.82rem;
+}
+
+.drill-agent-platform {
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+/* Cell types */
+.drill-task {
+  max-width: 220px;
+  color: var(--text-muted);
+  line-height: 1.4;
+}
+
+.drill-task--error { color: var(--danger); }
+
+.drill-num {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  white-space: nowrap;
+  color: var(--text);
+  font-weight: 600;
+}
+
+.drill-mono {
+  font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', 'Consolas', monospace;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+}
+
+/* Status badge */
+.drill-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 3px 8px;
+  border-radius: 20px;
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+
+.drill-badge-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.drill-badge--active {
+  background: color-mix(in srgb, var(--success) 12%, transparent);
+  color: var(--success);
+  border: 1px solid color-mix(in srgb, var(--success) 30%, transparent);
+}
+.drill-badge--active .drill-badge-dot { background: var(--success); }
+
+.drill-badge--idle {
+  background: color-mix(in srgb, var(--warning) 12%, transparent);
+  color: var(--warning);
+  border: 1px solid color-mix(in srgb, var(--warning) 30%, transparent);
+}
+.drill-badge--idle .drill-badge-dot { background: var(--warning); }
+
+.drill-badge--error {
+  background: color-mix(in srgb, var(--danger) 12%, transparent);
+  color: var(--danger);
+  border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent);
+}
+.drill-badge--error .drill-badge-dot { background: var(--danger); }
+
+.drill-badge--unconfigured {
+  background: var(--surface-alt);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+}
+.drill-badge--unconfigured .drill-badge-dot { background: var(--text-muted); }
+
+/* Error row highlight */
+.drill-row--error td { background: color-mix(in srgb, var(--danger) 4%, transparent); }
+.drill-row--error:hover td { background: color-mix(in srgb, var(--danger) 8%, transparent) !important; }
+
+/* Progress */
+.drill-progress-wrap {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 140px;
+}
+
+.drill-progress-track {
+  flex: 1;
+  height: 5px;
+  background: var(--border);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.drill-progress-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--accent), var(--success));
+  border-radius: 3px;
+  transition: width 0.6s ease;
+}
+
+.drill-progress-pct {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  min-width: 28px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* Empty state */
+.drill-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  gap: 10px;
+  text-align: center;
+}
+
+.drill-empty-icon { color: var(--text-muted); opacity: 0.5; }
+
+.drill-empty-title {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--text);
+  margin: 0;
+}
+
+.drill-empty-sub {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin: 0;
+}
